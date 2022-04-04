@@ -62,6 +62,7 @@ export default function App() {
     // If something goes wrong, check the status of the response:
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
+    setSpinnerOn(true)
     axiosWithAuth().get(articlesUrl)
     .then(res => {
       setArticles(res.data.articles)
@@ -70,7 +71,9 @@ export default function App() {
     .catch(err => {
       setMessage(err.response.data.message)
     })
-    .finally()
+    .finally(() => {
+      setSpinnerOn(false)
+    })
   }
 
   const postArticle = article => {
@@ -78,6 +81,7 @@ export default function App() {
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
+    setSpinnerOn(true)
     axiosWithAuth().post(articlesUrl, article)
     .then(res => {
       setArticles([...articles, res.data.article])
@@ -86,19 +90,20 @@ export default function App() {
     .catch(err => {
       setMessage(err.response.data.message)
     })
-    .finally()
+    .finally(() => {
+      setSpinnerOn(false)
+    })
   }
 
 
 
 
-  const updateArticle = ({ article_id, article }) => {
+  const updateArticle = ( article_id, article ) => {
     // ✨ implement
     // You got this!
-    const { ...changes } = article
-    axiosWithAuth().put(`${articlesUrl}/${article_id}`, changes)
+    setSpinnerOn(true)
+    axiosWithAuth().put(`${articlesUrl}/${article_id}`, article)
     .then(res => {
-      console.log('put res:',res)
       setArticles(articles.map(art => {
         return art.article_id === article_id
           ? res.data.article
@@ -110,12 +115,15 @@ export default function App() {
     .catch(err => {
       setMessage(err.response.data.message)
     })
-    .finally()
+    .finally(() => {
+      setSpinnerOn(false)
+    })
   }
 
 
   const deleteArticle = article_id => {
     // ✨ implement
+    setSpinnerOn(true)
     axiosWithAuth().delete(`${articlesUrl}/${article_id}`)
     .then(res => {
       setMessage(res.data.message)
@@ -126,7 +134,9 @@ export default function App() {
     .catch(err => {
       setMessage(err.response.data.message)
     })
-    .finally()
+    .finally(() => {
+      setSpinnerOn(false)
+    })
   }
 
   return (
@@ -148,7 +158,7 @@ export default function App() {
               <ArticleForm
                 postArticle={postArticle}
                 updateArticle={updateArticle}
-                setCurrentArticleId
+                setCurrentArticleId={setCurrentArticleId}
                 currentArticle={articles.find(art => art.article_id === currentArticleId)}
               />
               <Articles

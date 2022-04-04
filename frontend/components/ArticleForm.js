@@ -29,15 +29,15 @@ export default function ArticleForm(props) {
 
   const onSubmit = evt => {
     evt.preventDefault()
-    setValues(initialFormValues)
     // ✨ implement
     // We must submit a new post or update an existing one,
     // depending on the truthyness of the `currentArticle` prop.
     if (currentArticle) {
-      updateArticle(evt)
+      updateArticle(currentArticle.article_id, values)
     } else {
       postArticle(values)
     }
+    setValues(initialFormValues)
 
   }
 
@@ -74,7 +74,7 @@ export default function ArticleForm(props) {
       </select>
       <div className="button-group">
         <button disabled={!isDisabled()} id="submitArticle">Submit</button>
-        <button onClick={Function.prototype}>Cancel edit</button>
+        <button onClick={() => setCurrentArticleId(null)}>Cancel edit</button>
       </div>
     </form>
   )
