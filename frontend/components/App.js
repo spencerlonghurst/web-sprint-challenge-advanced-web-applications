@@ -30,6 +30,8 @@ export default function App() {
     // and a message saying "Goodbye!" should be set in its proper state.
     // In any case, we should redirect the browser back to the login screen,
     // using the helper above.
+    window.localStorage.removeItem('token')
+    navigate('/')
   }
 
   const login = ({ username, password }) => {
@@ -46,6 +48,8 @@ export default function App() {
         navigate('/articles')
       })
       .catch(err => {
+        console.log(err.response.message)
+        // setMessage(err.response.message)
         debugger
       })
   }
@@ -59,6 +63,16 @@ export default function App() {
     // If something goes wrong, check the status of the response:
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
+    axiosWithAuth().get(articlesUrl)
+    .then(res => {
+      setArticles(res.data.articles)
+      setMessage(res.data.message)
+    })
+    .catch(err => {
+      console.log('getArticles:', err.response.data.message)
+      setMessage(err.response.data.message)
+    })
+    .finally()
   }
 
   const postArticle = article => {
@@ -66,22 +80,60 @@ export default function App() {
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
+    axiosWithAuth().post(articlesUrl, article)
+    .then(res => {
+      setArticles([...articles, res.data.article])
+    })
+    .catch(err => {
+      console.log('post err:', err)
+      debugger
+    })
+    .finally()
   }
+
+
+
 
   const updateArticle = ({ article_id, article }) => {
     // ✨ implement
     // You got this!
+    const { ...changes } = article
+    axiosWithAuth().put(`${articlesUrl}/${article_id}`, changes)
+    .then(res => {
+      console.log('put res:',res)
+    })
+    .catch(err => {
+      console.log('put err:', err)
+    })
+    .finally()
   }
+
+  // const editArticle = article_id => {
+  //   setCurrentArticleId(article_id)
+  // }
+
 
   const deleteArticle = article_id => {
     // ✨ implement
+    axiosWithAuth().delete(`${articlesUrl}/${article_id}`)
+    .then(res => {
+      console.log('deleted res', res)
+      setMessage(res.data.message)
+      setArticles(articles.filter(art =>{
+        return art.article_id !== article_id
+      }))
+    })
+    .catch(err => {
+      console.log('delete err:', err)
+    })
+    .finally()
   }
 
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <React.StrictMode>
       <Spinner />
-      <Message />
+      <Message message={message}/>
       <button id="logout" onClick={logout}>Logout from app</button>
       <div id="wrapper" style={{ opacity: spinnerOn ? "0.25" : "1" }}> {/* <-- do not change this line */}
         <h1>Advanced Web Applications</h1>
@@ -93,8 +145,19 @@ export default function App() {
           <Route path="/" element={<LoginForm login={login} />} />
           <Route path="articles" element={
             <>
-              <ArticleForm />
-              <Articles />
+              <ArticleForm
+                postArticle={postArticle}
+                updateArticle={updateArticle}
+                setCurrentArticleId
+                currentArticle={articles.find(art => art.article_id === currentArticleId)}
+              />
+              <Articles
+                articles={articles}
+                getArticles={getArticles}
+                deleteArticle={deleteArticle}
+                // setCurrentArticleId={editArticle}
+                currentArticleId
+              />
             </>
           } />
         </Routes>
