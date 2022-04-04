@@ -23,6 +23,10 @@ export default function Articles(props) {
     getArticles()
   }, [])
 
+  const fillInForm = article_id => {
+    setCurrentArticleId(article_id)
+    console.log('article_id', article_id)
+  }
   return (
     // ✨ fix the JSX: replace `Function.prototype` with actual functions
     // and use the articles prop to generate articles
@@ -40,7 +44,7 @@ export default function Articles(props) {
                   <p>Topic: {art.topic}</p>
                 </div>
                 <div>
-                  <button disabled={true} onClick={Function.prototype}>Edit</button>
+                  <button disabled={false} onClick={() => fillInForm(art.article_id)}>Edit</button>
                   <button disabled={false} onClick={() => deleteArticle(art.article_id)}>Delete</button>
                 </div>
               </div>

@@ -21,12 +21,13 @@ export default function LoginForm(props) {
     login(values)
   }
 
-  const isDisabled = () => {
+  const isDisabled = () => values.username.trim().length >= 3 && values.password.trim().length >= 8;
     // ✨ implement
     // Trimmed username must be >= 3, and
     // trimmed password must be >= 8 for
     // the button to become enabled
-  }
+    // console.log(username)
+  
 
   return (
     <form id="loginForm" onSubmit={onSubmit}>
@@ -45,7 +46,7 @@ export default function LoginForm(props) {
         placeholder="Enter password"
         id="password"
       />
-      <button disabled={isDisabled()} id="submitCredentials">Submit credentials</button>
+      <button disabled={!isDisabled()} id="submitCredentials">Submit credentials</button>
     </form>
   )
 }

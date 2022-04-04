@@ -16,7 +16,7 @@ export default function App() {
   // ✨ MVP can be achieved with these states
   const [articles, setArticles] = useState([])
   const [message, setMessage] = useState('')
-  const [currentArticleId, setCurrentArticleId] = useState()
+  const [currentArticleId, setCurrentArticleId] = useState(null)
   const [spinnerOn, setSpinnerOn] = useState(false)
 
   // ✨ Research `useNavigate` in React Router v.6
@@ -32,6 +32,7 @@ export default function App() {
     // using the helper above.
     window.localStorage.removeItem('token')
     navigate('/')
+    setMessage('Goodbye!')
   }
 
   const login = ({ username, password }) => {
@@ -48,9 +49,7 @@ export default function App() {
         navigate('/articles')
       })
       .catch(err => {
-        console.log(err.response.message)
-        // setMessage(err.response.message)
-        debugger
+        setMessage(err.response.data.message)
       })
   }
 
@@ -69,7 +68,6 @@ export default function App() {
       setMessage(res.data.message)
     })
     .catch(err => {
-      console.log('getArticles:', err.response.data.message)
       setMessage(err.response.data.message)
     })
     .finally()
@@ -83,10 +81,10 @@ export default function App() {
     axiosWithAuth().post(articlesUrl, article)
     .then(res => {
       setArticles([...articles, res.data.article])
+      setMessage(res.data.message)
     })
     .catch(err => {
-      console.log('post err:', err)
-      debugger
+      setMessage(err.response.data.message)
     })
     .finally()
   }
@@ -101,30 +99,32 @@ export default function App() {
     axiosWithAuth().put(`${articlesUrl}/${article_id}`, changes)
     .then(res => {
       console.log('put res:',res)
+      setArticles(articles.map(art => {
+        return art.article_id === article_id
+          ? res.data.article
+          : art
+      }))
+      setMessage(res.data.message)
+      setCurrentArticleId(null)
     })
     .catch(err => {
-      console.log('put err:', err)
+      setMessage(err.response.data.message)
     })
     .finally()
   }
-
-  // const editArticle = article_id => {
-  //   setCurrentArticleId(article_id)
-  // }
 
 
   const deleteArticle = article_id => {
     // ✨ implement
     axiosWithAuth().delete(`${articlesUrl}/${article_id}`)
     .then(res => {
-      console.log('deleted res', res)
       setMessage(res.data.message)
       setArticles(articles.filter(art =>{
         return art.article_id !== article_id
       }))
     })
     .catch(err => {
-      console.log('delete err:', err)
+      setMessage(err.response.data.message)
     })
     .finally()
   }
@@ -155,7 +155,7 @@ export default function App() {
                 articles={articles}
                 getArticles={getArticles}
                 deleteArticle={deleteArticle}
-                // setCurrentArticleId={editArticle}
+                setCurrentArticleId={setCurrentArticleId}
                 currentArticleId
               />
             </>
